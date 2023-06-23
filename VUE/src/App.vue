@@ -1,26 +1,29 @@
 
 <template>
-  <form @submit.prevent="onSubmit">
-    <div class="new-task">
-      <input type="text" placeholder="Nuova task" v-model="newTask" @keyup.enter="aggiungiTask">
-      <button @click="aggiungiTask">Aggiungi</button>
-
-      <!-- output errore in pagina -->
-      <div class="error" v-if="error">
-        <small style="color:red">Devi inserire un task di almeno 5 caratteri</small>
-      </div>
-    </div>
-  </form>
   <div class="tasks-container">
     <ul>
-      <li class="task" v-for="(task, index) in tasks" :class="task.done === true ? 'fatto' : ''"
-        @click.stop="invertDone(task)">
+      <li class="task" v-for="(task, i) in tasks" :key="i">
         {{ task.text }}
 
         <i class="fa-solid fa-xmark" @click.stop="rimuoviTask"></i>
       </li>
     </ul>
   </div>
+
+  <!-- aggiunta task -->
+  <form @submit.prevent="onSubmit">
+
+    <div class="new-task">
+      <label for="task"> task </label>
+      <input type="text" name="task" placeholder="Nuova task" v-model="newTask.text">
+      <button>Aggiungi</button>
+
+      <!-- output errore in pagina -->
+      <!-- <div class="error" v-if="error">
+    <small style="color:red">Devi inserire un task di almeno 5 caratteri</small>
+  </div> -->
+    </div>
+  </form>
 </template>
 
 <script>
@@ -32,20 +35,41 @@ export default {
     return {
       tasks: [],
 
-      error: false,
-      newTask: '',
-      text: '',
+      newTask: {
+        text: ""
+      }
 
     };
   },
+  methods: {
+
+    onSubmit() {
+
+      const url = 'http://localhost/Esercizio3-22Giugno/php-todo-list-json/PHP/newTask.php';
+      const data = this.newTask;
+      const headers = {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      };
+
+      axios.post(url, data, headers)
+        .then(res => {
+
+          const data = res.data;
+          this.tasks = data;
+
+          this.newTask.text = "";
+        })
+    }
+  },
   mounted() {
-    axios.get("http://localhost/Esercizio3-22Giugno/php-todo-list-json/PHP/")
+    axios.post("http://localhost/Esercizio3-22Giugno/php-todo-list-json/PHP/tasks.php")
       .then(res => {
         const data = res.data;
         this.tasks = data;
-      });
+      })
   }
 }
+
 </script>
 
 
