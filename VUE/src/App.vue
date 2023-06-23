@@ -1,29 +1,33 @@
 
 <template>
-  <div class="tasks-container">
-    <ul>
-      <li class="task" v-for="(task, i) in tasks" :key="i">
-        {{ task.text }}
+  <div id="app">
+    <div class="tasks-container">
+      <ul>
+        <li class="task" v-for="(task, i) in tasks" :key="i" :class="task.done === true ? 'fatto' : ''"
+          @click="invertDone(task)">
+          {{ task.text }}
 
-        <i class="fa-solid fa-xmark" @click.stop="rimuoviTask"></i>
-      </li>
-    </ul>
-  </div>
+          <i class="fa-solid fa-xmark" @click.stop="deleteTask(i)">
+          </i>
+        </li>
+      </ul>
+    </div>
 
-  <!-- aggiunta task -->
-  <form @submit.prevent="onSubmit">
+    <!-- aggiunta task -->
+    <form @submit.prevent="onSubmit">
 
-    <div class="new-task">
-      <label for="task"> task </label>
-      <input type="text" name="task" placeholder="Nuova task" v-model="newTask.text">
-      <button>Aggiungi</button>
+      <div class="new-task">
+        <label for="task"> </label>
+        <input type="text" name="task" placeholder="Nuova task" v-model="newTask.text">
+        <button>Aggiungi</button>
 
-      <!-- output errore in pagina -->
-      <!-- <div class="error" v-if="error">
+        <!-- output errore in pagina -->
+        <!-- <div class="error" v-if="error">
     <small style="color:red">Devi inserire un task di almeno 5 caratteri</small>
   </div> -->
-    </div>
-  </form>
+      </div>
+    </form>
+  </div>
 </template>
 
 <script>
@@ -33,10 +37,12 @@ export default {
   data() {
 
     return {
+      error: false,
       tasks: [],
 
       newTask: {
-        text: ""
+        text: "",
+
       }
 
     };
@@ -51,6 +57,7 @@ export default {
         headers: { 'Content-Type': 'multipart/form-data' }
       };
 
+
       axios.post(url, data, headers)
         .then(res => {
 
@@ -59,7 +66,31 @@ export default {
 
           this.newTask.text = "";
         })
-    }
+    },
+    deleteTask(index) {
+
+      const url = 'http://localhost/Esercizio3-22Giugno/php-todo-list-json/PHP/deleteTask.php';
+      const data = { "index": index };
+      const headers = {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      };
+
+      axios.post(url, data, headers)
+        .then(res => {
+
+          const data = res.data;
+          this.tasks = data;
+        });
+    },
+    invertDone(index) {
+
+      if (index.done === true) {
+        index.done = false;
+      } else {
+        index.done = true;
+
+      }
+    },
   },
   mounted() {
     axios.post("http://localhost/Esercizio3-22Giugno/php-todo-list-json/PHP/tasks.php")
@@ -124,5 +155,11 @@ export default {
 
 .fatto {
   text-decoration: line-through;
+}
+
+.fa-xmark {
+  color: red;
+  padding: 3px;
+  font-size: 25px;
 }
 </style>
